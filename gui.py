@@ -46,14 +46,33 @@ class QueueSimulatorGUI(QMainWindow):
         self.tabs.addTab(calculations_tab, "Calculations")
 
     def init_plot(self):
-        plot_tab = QWidget()
-        plot_layout = QVBoxLayout()
-        plot_tab.setLayout(plot_layout)
-        self.tabs.addTab(plot_tab, "Plot")
+        self.plot_tab = QWidget()
+        self.plot_layout = QVBoxLayout()
+        self.plot_tab.setLayout(self.plot_layout)
+        self.tabs.addTab(self.plot_tab, "Plot")
 
     def run_calculation(self):
         lamda = float(self.lamda_field.text())
         mu = float(self.mu_field.text())
         results, data = calculate_queue_metrics(lamda, mu)
         self.result_area.setPlainText(results)
-        PlotWidget(data)
+
+        # Remove any previous plot
+        for i in reversed(range(self.plot_layout.count())):
+            self.plot_layout.itemAt(i).widget().setParent(None)
+
+        dummy_sim_data = {                          #TODO: Replace dummy data with real simulation data
+            "rho_sim": [
+                0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75,
+                0.8, 0.85, 0.9, 0.92, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99
+            ],
+            "Wq_sim": [
+                0.05, 0.11, 0.18, 0.28, 0.5, 0.85, 1.3, 2.3, 4.8, 7.5,
+                12.0, 20.5, 38.0, 55.0, 85.0, 120.0, 160.0, 220.0, 350.0, 600.0
+            ]  # in minutes, sharply rising near 1
+        }
+
+        # Add the new plot
+        plot_widget = PlotWidget(data, dummy_sim_data)
+        self.plot_layout.addWidget(plot_widget)
+
