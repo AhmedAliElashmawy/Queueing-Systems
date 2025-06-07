@@ -7,10 +7,6 @@ from simulation import QueueSimulator
 from theoritical import calculate_queue_metrics
 
 
-# Convert from hourly rate to minutely rate
-TO_MINUTES_RATE = lambda x: x * 60
-
-
 
 
 def present_theoretical_results(lamda , mu):

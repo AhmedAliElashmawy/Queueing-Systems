@@ -8,9 +8,11 @@ class QueueSimulator:
     # Constants
     # -----------------------------
 
-    SIMULATION_TIME = int(2e4)  # in minutes
-    MU = 12                     # minutely rate
-    LAMDA = 6                   # minutely rate
+    TO_MINUTELY_RATE = lambda x: x / 60
+
+    SIMULATION_TIME = int(3e5)                      # in minutes
+    MU = TO_MINUTELY_RATE(12)                     # minutely rate
+    LAMDA = TO_MINUTELY_RATE(6)                 # minutely rate
 
     class QueueEvent(Enum):
         ARRIVAL = 0,
@@ -157,11 +159,12 @@ class QueueSimulator:
 
         self.__reset_data()
 
+
         if simulation_time <= 0:
             simulation_time = QueueSimulator.SIMULATION_TIME
 
-        self.lamda = lamda if lamda > 0 else QueueSimulator.LAMDA
-        self.mu = mu if mu > 0 else QueueSimulator.MU
+        self.lamda = QueueSimulator.TO_MINUTELY_RATE(lamda) if lamda > 0 else QueueSimulator.LAMDA
+        self.mu = QueueSimulator.TO_MINUTELY_RATE(mu) if mu > 0 else QueueSimulator.MU
 
         # Initialize the simulation parameters
         current_time = 0.0
@@ -288,6 +291,6 @@ class QueueSimulator:
         print(f"Utilization factor (ρ): {self.rho:.4f}")
         print(f"Average number of customers in the system (L): {self.L:.4f}")
         print(f"Average number of customers in the queue (Lq): {self.Lq:.4f}")
-        print(f"Average time a customer spends in the system (Ws) in minutes: {self.Ws:.4f}")
-        print(f"Average time a customer spends waiting in the queue (Wq) in minutes: {self.Wq:.4f}")
+        print(f"Average time a customer spends in the system (Ws) in hours: {self.Ws/60:.4f} , in minutes: {self.Ws:.4f}")
+        print(f"Average time a customer spends waiting in the queue (Wq) in hours: {self.Wq/60:.4f} , in minutes: {self.Wq:.4f}")
         print(f"P0-P3: {', '.join(f'{p:.4f}' for p in self.P)}")

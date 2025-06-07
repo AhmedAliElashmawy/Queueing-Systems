@@ -1,13 +1,12 @@
 import sys
 import os
 import random
-
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logic')))
 
 from PyQt6.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QTabWidget, QLineEdit, QTextEdit
+
+
 from plot import PlotWidget
-
-
 from theoritical import calculate_queue_metrics
 from simulation import QueueSimulator
 
@@ -86,7 +85,7 @@ class QueueSimulatorGUI(QMainWindow):
 
         for lamda in lamda_values:
             simulator.run_simulation(lamda, mu)
-            wq_points.append(simulator.Wq* 60)
+            wq_points.append(simulator.Wq)
 
 
         return {
