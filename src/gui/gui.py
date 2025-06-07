@@ -1,5 +1,6 @@
 import sys
 import os
+import random
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logic')))
 
@@ -64,16 +65,19 @@ class QueueSimulatorGUI(QMainWindow):
         self.plot_tab.setLayout(self.plot_layout)
         self.tabs.addTab(self.plot_tab, "Plot")
 
+    def generate_sorted_spread_points(self,n=20):
+        step = 1.0 / (n + 1)
+        points = [(i + 1) * step + random.uniform(-0.4, 0.4) * step for i in range(n)]
+
+        points = [min(max(p, 0.0001), 0.9999) for p in points]
+        return sorted(points)
 
     def generate_simulation_data(self, mu):
         """
         Generate ploting data for simulation.
         """
-        # rho_points = [i*4.9 / 100 for i in range(1, 20)]
-        rho_points =  [
-                0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75,
-                0.8, 0.85, 0.9, 0.92, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99
-            ]
+
+        rho_points = self.generate_sorted_spread_points()
 
         wq_points = []
         lamda_values = [rho * mu for rho in rho_points]
