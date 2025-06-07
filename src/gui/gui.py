@@ -3,7 +3,8 @@ import os
 import random
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logic')))
 
-from PyQt6.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QTabWidget, QLineEdit, QTextEdit
+from PyQt6.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QTabWidget, QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QHeaderView
+from PyQt6.QtCore import Qt
 
 
 from plot import PlotWidget
@@ -38,25 +39,37 @@ class QueueSimulatorGUI(QMainWindow):
         calculations_tab = QWidget()
         calculations_layout = QVBoxLayout()
 
-        # Add input fields and buttons for calculations
+        # Parameter input section
+        params_layout = QVBoxLayout()
+
         self.lamda_field = QLineEdit()
         self.lamda_field.setPlaceholderText("Enter λ (arrival rate)")
-        calculations_layout.addWidget(self.lamda_field)
+        params_layout.addWidget(self.lamda_field)
 
         self.mu_field = QLineEdit()
         self.mu_field.setPlaceholderText("Enter μ (service rate)")
-        calculations_layout.addWidget(self.mu_field)
+        params_layout.addWidget(self.mu_field)
 
-        self.calculate_button = QPushButton("Run Calculation")
+        self.calculate_button = QPushButton("Run Comparison")
         self.calculate_button.clicked.connect(self.run_calculation)
-        calculations_layout.addWidget(self.calculate_button)
+        params_layout.addWidget(self.calculate_button)
 
-        self.result_area = QTextEdit()
-        self.result_area.setReadOnly(True)
-        calculations_layout.addWidget(self.result_area)
+        calculations_layout.addLayout(params_layout)
+
+        # Create a table for comparison
+        self.table = QTableWidget(5, 2)  # 5 rows (rho, Wq, Ws, L, Lq), 2 columns (Theoretical, Simulation)
+        self.table.setHorizontalHeaderLabels(["Theoretical", "Simulation"])
+        self.table.setVerticalHeaderLabels(["ρ", "Wq (minutes)",
+                                        "Ws (minutes)", "L",
+                                        "Lq"])
+
+        # Set the first column with metrics names
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+
+        calculations_layout.addWidget(self.table)
 
         calculations_tab.setLayout(calculations_layout)
-        self.tabs.addTab(calculations_tab, "Calculations")
+        self.tabs.addTab(calculations_tab, "Comparison")
 
     def init_plot(self):
         self.plot_tab = QWidget()
@@ -98,17 +111,43 @@ class QueueSimulatorGUI(QMainWindow):
     def run_calculation(self):
         lamda = float(self.lamda_field.text())
         mu = float(self.mu_field.text())
-        results, data = calculate_queue_metrics(lamda, mu)
-        self.result_area.setPlainText(results)
+
+        # Get theoretical results
+        results, theory_data = calculate_queue_metrics(lamda, mu)
+
+        # Run simulation
+        simulator = QueueSimulator()
+        simulator.run_simulation(lamda, mu)
+
+        # Fill table with theoretical values
+        self.table.setItem(0, 0, QTableWidgetItem(f"{results['rho']:.4f}"))
+        self.table.setItem(1, 0, QTableWidgetItem(f"{results['Wq']*60:.4f}"))
+        self.table.setItem(2, 0, QTableWidgetItem(f"{results['Ws']*60:.4f}"))
+        self.table.setItem(3, 0, QTableWidgetItem(f"{results['L']:.4f}"))
+        self.table.setItem(4, 0, QTableWidgetItem(f"{results['Lq']:.4f}"))
+
+        # Fill table with simulation values
+        self.table.setItem(0, 1, QTableWidgetItem(f"{simulator.rho:.4f}"))
+        self.table.setItem(1, 1, QTableWidgetItem(f"{simulator.Wq:.4f}"))
+        self.table.setItem(2, 1, QTableWidgetItem(f"{simulator.Ws:.4f}"))
+        self.table.setItem(3, 1, QTableWidgetItem(f"{simulator.L:.4f}"))
+        self.table.setItem(4, 1, QTableWidgetItem(f"{simulator.Lq:.4f}"))
+
+        # Make all cells read-only
+        for row in range(5):
+            for col in range(2):
+                if item := self.table.item(row, col):
+                    item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+
 
         # Remove any previous plot
         for i in reversed(range(self.plot_layout.count())):
             self.plot_layout.itemAt(i).widget().setParent(None)
 
-        # Generates simulation data points
+        # Generate simulation data points for plot
         sim_data = self.generate_simulation_data(mu)
 
         # Add the new plot
-        plot_widget = PlotWidget(data, sim_data)
+        plot_widget = PlotWidget(theory_data, sim_data)
         self.plot_layout.addWidget(plot_widget)
 

@@ -33,14 +33,14 @@ def calculate_queue_metrics(lamda, mu):
     # Probability of n customers in the system (P0, P1, P2, P3)
     P = [(1 - rho) * (rho ** n) for n in range(4)]
 
-    results = (
-        f"Utilization factor (ρ): {rho:.4f}\n"
-        f"Average number of customers in the system (L): {L:.4f}\n"
-        f"Average number of customers in the queue (Lq): {Lq:.4f}\n"
-        f"Average time a customer spends in the system (Ws) in hours: {Ws:.4f} in minutes: {Ws * 60:.4f}\n"
-        f"Average time a customer spends waiting in the queue (Wq) in hours: {Wq:.4f} in minutes: {Wq * 60:.4f}\n"
-        f"P0-P3: {', '.join(f'{p:.4f}' for p in P)}"
-    )
+    results = {
+        "rho" : rho,
+        "Wq": Wq,
+        "Ws": Ws,
+        "L": L,
+        "Lq": Lq,
+        "P": P
+    }
 
     # Generate full theoretical curve data for plotting
     rho_values = np.linspace(0.01, 0.99, 100)
