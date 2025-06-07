@@ -57,11 +57,18 @@ class QueueSimulatorGUI(QMainWindow):
         calculations_layout.addLayout(params_layout)
 
         # Create a table for comparison
-        self.table = QTableWidget(5, 2)  # 5 rows (rho, Wq, Ws, L, Lq), 2 columns (Theoretical, Simulation)
+        self.table = QTableWidget(9, 2)  # 5 rows (rho, Wq, Ws, L, Lq), 2 columns (Theoretical, Simulation)
         self.table.setHorizontalHeaderLabels(["Theoretical", "Simulation"])
-        self.table.setVerticalHeaderLabels(["ρ", "Wq (minutes)",
-                                        "Ws (minutes)", "L",
-                                        "Lq"])
+        self.table.setVerticalHeaderLabels(["Server Utilization (ρ)",
+                                            "Avg Wait Time in Queue in minutes (Wq)",
+                                            "Avg Time in System in minutes (Ws)",
+                                            "Avg Customers in System (L)",
+                                            "Avg Customers in Queue (Lq)",
+                                            "P(System has 0 customers) (P₀)",
+                                            "P(System has 1 customer) (P₁)",
+                                            "P(System has 2 customers) (P₂)",
+                                            "P(System has 3 customers) (P₃)"
+                                            ])
 
         # Set the first column with metrics names
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -125,6 +132,10 @@ class QueueSimulatorGUI(QMainWindow):
         self.table.setItem(2, 0, QTableWidgetItem(f"{results['Ws']*60:.4f}"))
         self.table.setItem(3, 0, QTableWidgetItem(f"{results['L']:.4f}"))
         self.table.setItem(4, 0, QTableWidgetItem(f"{results['Lq']:.4f}"))
+        self.table.setItem(5, 0, QTableWidgetItem(f"{results['P'][0]:.4f}"))
+        self.table.setItem(6, 0, QTableWidgetItem(f"{results['P'][1]:.4f}"))
+        self.table.setItem(7, 0, QTableWidgetItem(f"{results['P'][2]:.4f}"))
+        self.table.setItem(8, 0, QTableWidgetItem(f"{results['P'][3]:.4f}"))
 
         # Fill table with simulation values
         self.table.setItem(0, 1, QTableWidgetItem(f"{simulator.rho:.4f}"))
@@ -132,6 +143,10 @@ class QueueSimulatorGUI(QMainWindow):
         self.table.setItem(2, 1, QTableWidgetItem(f"{simulator.Ws:.4f}"))
         self.table.setItem(3, 1, QTableWidgetItem(f"{simulator.L:.4f}"))
         self.table.setItem(4, 1, QTableWidgetItem(f"{simulator.Lq:.4f}"))
+        self.table.setItem(5, 1, QTableWidgetItem(f"{simulator.P[0]:.4f}"))
+        self.table.setItem(6, 1, QTableWidgetItem(f"{simulator.P[1]:.4f}"))
+        self.table.setItem(7, 1, QTableWidgetItem(f"{simulator.P[2]:.4f}"))
+        self.table.setItem(8, 1, QTableWidgetItem(f"{simulator.P[3]:.4f}"))
 
         # Make all cells read-only
         for row in range(5):
